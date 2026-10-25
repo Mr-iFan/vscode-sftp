@@ -74,6 +74,7 @@ interface SftpOption {
   sshConfigPath?: string;
   concurrency: number;
   sshCustomParams?: string;
+  proxyCommand?: string;
   hop: (Host & SftpOption)[] | (Host & SftpOption);
 }
 
@@ -251,6 +252,7 @@ function mergeConfigWithExternalRefer(
     ['identityfile', 'privateKeyPath'],
     ['serveraliveinterval', 'keepalive'],
     ['connecttimeout', 'connTimeout'],
+    ['proxycommand', 'proxyCommand'],
   ]);
 
   section.config.forEach(line => {

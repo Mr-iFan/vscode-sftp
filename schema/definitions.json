@@ -214,6 +214,10 @@
         ],
         "description": "Keyboard interaction authentication mechanism. For example using Google Authentication."
       },
+      "proxyCommand": {
+        "type": "string",
+        "description": "Command used to open the connection to the SSH server. Supports %h (host), %p (port), %r (user), and %% (literal percent)."
+      },
       "algorithms": {
         "type": "object",
         "description": "Explicit overrides for the default transport layer algorithms used for the connection.",

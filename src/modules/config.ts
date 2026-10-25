@@ -31,6 +31,7 @@ const configScheme = {
   algorithms: Joi.any(),
   sshConfigPath: Joi.string(),
   sshCustomParams: Joi.string(),
+  proxyCommand: Joi.string(),
 
   secure: Joi.any().valid(true, false, 'control', 'implicit'),
   secureOptions: nullable(Joi.object()),

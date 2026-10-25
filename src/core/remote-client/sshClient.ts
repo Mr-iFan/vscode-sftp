@@ -5,6 +5,7 @@ import localFs from '../localFs';
 import { FileSystem, RemoteFileSystem, SFTPFileSystem } from '../fs';
 import logger from '../../logger';
 import CustomError from '../customError';
+import { createProxyCommandStream } from './proxyCommand';
 
 let MAX_OPEN_FD_NUM = 222;
 
@@ -13,6 +14,7 @@ export default class SSHClient extends RemoteClient {
   private hoppingClients: SSHClient[];
   private _opendFdNum: number = 0;
   private _queuedFdRequireCall: Array<(...args: any[]) => any> = [];
+  private _proxyStream: any;
 
   _initClient() {
     return new Client();
@@ -241,8 +243,18 @@ export default class SSHClient extends RemoteClient {
     const {
       interactiveAuth,
       connectTimeout,
+      proxyCommand,
       ...option // tslint:disable-line
     } = remoteOption;
+
+    if (proxyCommand && !option.sock) {
+      this._proxyStream = createProxyCommandStream(proxyCommand, {
+        host: option.host,
+        port: option.port,
+        username: option.username,
+      });
+      option.sock = this._proxyStream;
+    }
 
     // explict compare to true, cause we want to distinct between string and true
     if (option.passphrase === true) {
@@ -301,8 +313,8 @@ export default class SSHClient extends RemoteClient {
         .on('error', err => {
           reject(new Error(`[${option.host}]: ${err.message}`));
         })
-        .on('close', this.end())
-        .on('end', this.end())
+        .on('close', () => this.end())
+        .on('end', () => this.end())
         .connect({
           keepaliveInterval: 1000 * 30, // 30 secs, original
           // keepaliveInterval: 1000 * 600, // 10 mins
@@ -355,6 +367,11 @@ export default class SSHClient extends RemoteClient {
 
   end() {
     this._client.end();
+
+    if (this._proxyStream) {
+      this._proxyStream.destroy();
+      this._proxyStream = undefined;
+    }
 
     if (this.hoppingClients) {
       // last connect first end

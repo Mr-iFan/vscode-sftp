@@ -15,6 +15,7 @@ export interface ConnectOption {
   passphrase?: string | boolean;
   interactiveAuth?: boolean | string[];
   agent?: string;
+  proxyCommand?: string;
   sock?: any;
   hop?: ConnectOption | ConnectOption[];
   limitOpenFilesOnRemote?: boolean | number;
